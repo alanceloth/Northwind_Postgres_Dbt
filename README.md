@@ -1,4 +1,20 @@
+Created Render Postgres database based on Northwind database
+Created Render pdAdmin and setup the connection with the Database: [pgAdmin link](https://pgadmin-nydj.onrender.com/browser/)
+Installed dbt with Postgres adapter
 
+```bash
+$ dbt --version
+Core:
+  - installed: 1.8.2
+  - latest:    1.8.2 - Up to date!
+
+Plugins:
+  - postgres: 1.8.1 - Up to date!
+```
+
+
+
+---------------------------------------
 Welcome to my default Data Project Repo.
 
 To use this project structure you will need to follow the steps below.
