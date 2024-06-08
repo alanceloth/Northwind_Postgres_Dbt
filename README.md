@@ -1,7 +1,9 @@
-Created Render Postgres database based on Northwind database
-Created Render pdAdmin and setup the connection with the Database: [pgAdmin link](https://pgadmin-nydj.onrender.com/browser/)
-Installed dbt with Postgres adapter
+# Steps:
+- Created Render Postgres database based on Northwind database
+- Created Render pdAdmin and setup the connection with the Database: [pgAdmin link](https://pgadmin-nydj.onrender.com/browser/)
+- Installed dbt with Postgres adapter: ```pip install dbt-postgres```
 
+After installation:
 ```bash
 $ dbt --version
 Core:
