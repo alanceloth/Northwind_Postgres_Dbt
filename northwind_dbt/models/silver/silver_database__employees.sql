@@ -6,41 +6,57 @@
 WITH cleaned_addresses AS (
     SELECT 
         *,
-        REPLACE(address, '\n', ' ') AS cleaned_address
+        REPLACE(address, E'\n', ' ') AS cleaned_address
     FROM 
-        bronze.bronze_database__employees
+        public_bronze.bronze_database__employees
 ),
 
-split_addresses AS (
+extracted_numbers AS (
     SELECT
         *,
-        REGEXP_EXTRACT(cleaned_address, r'(\d+)\s*-\s*(.+?)(?:,\s*(.+))?$', 1) AS number,
-        REGEXP_EXTRACT(cleaned_address, r'(\d+)\s*-\s*(.+?)(?:,\s*(.+))?$', 2) AS street,
-        REGEXP_EXTRACT(cleaned_address, r'(\d+)\s*-\s*(.+?)(?:,\s*(.+))?$', 3) AS apartment
+        (SELECT (REGEXP_MATCHES(cleaned_address, '^(\d+)\s*-?\s*'))[1]) AS number
     FROM
         cleaned_addresses
 ),
 
+extracted_street_apartment AS (
+    SELECT
+        en.*,
+        (SELECT (REGEXP_MATCHES(en.cleaned_address, '^\d+\s*-?\s*(.+?)(?:\s+Apt\.?\s*(.+))?$'))[1]) AS street,
+        (SELECT (REGEXP_MATCHES(en.cleaned_address, '^\d+\s*-?\s*(.+?)(?:\s+Apt\.?\s*(.+))?$'))[2]) AS apartment
+    FROM
+        extracted_numbers en
+),
+
 final_addresses AS (
     SELECT
-        *,
-        CASE 
-            WHEN number IS NULL THEN REGEXP_EXTRACT(cleaned_address, r'(\d+)\s*(.+)', 1)
-            ELSE number
-        END AS number,
-        CASE 
-            WHEN street IS NULL THEN REGEXP_EXTRACT(cleaned_address, r'(\d+)\s*(.+)', 2)
-            ELSE street
-        END AS street,
-        apartment
+        esa.*,
+        COALESCE(esa.number, (SELECT (REGEXP_MATCHES(esa.cleaned_address, '^(\d+)\s+'))[1])) AS final_number,
+        COALESCE(esa.street, (SELECT (REGEXP_MATCHES(esa.cleaned_address, '^\d+\s+(.+)$'))[1])) AS final_street
     FROM
-        split_addresses
+        extracted_street_apartment esa
 )
 
 SELECT
-    *,
-    number,
-    street,
-    apartment
+    employee_id, 
+    last_name, 
+    first_name, 
+    title, 
+    title_of_courtesy, 
+    birth_date, 
+    hire_date, 
+    address,
+    final_number AS number,
+    final_street AS street,
+    city, 
+    region, 
+    postal_code, 
+    country, 
+    home_phone, 
+    extension, 
+    photo, 
+    notes, 
+    reports_to, 
+    photo_path
 FROM
     final_addresses
